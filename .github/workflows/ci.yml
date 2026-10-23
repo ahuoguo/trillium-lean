@@ -1,0 +1,36 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      # Builds the project (iris-lean is built from source at the pinned revision;
+      # Mathlib comes from its cache). `.lake` is cached between runs.
+      - uses: leanprover/lean-action@f061402b660e0c34644504b324e830f2991d4865 # v1.6.1
+        with:
+          use-mathlib-cache: true
+
+      - name: Fetch the Trillium Rocq sources at the pinned revision
+        run: |
+          rev=$(cat scripts/TRILLIUM_ROCQ_REVISION)
+          git init -q "$RUNNER_TEMP/trillium"
+          git -C "$RUNNER_TEMP/trillium" fetch -q --depth 1 https://github.com/logsem/trillium "$rev"
+          git -C "$RUNNER_TEMP/trillium" checkout -q FETCH_HEAD
+
+      # Fails if any Rocq declaration is neither ported nor ignored, if any ported
+      # declaration depends on `sorry`, or if an annotation is stale.
+      - name: Check the Rocq ↔ Lean correspondence
+        run: python3 scripts/check_correspondence.py --rocq "$RUNNER_TEMP/trillium" --strict
+
+      - name: Check that CORRESPONDENCE.md is up to date
+        run: git diff --exit-code CORRESPONDENCE.md

@@ -1,0 +1,35 @@
+name = "trillium"
+version = "0.1.0"
+defaultTargets = ["Trillium"]
+builtinLint = true
+
+[leanOptions]
+pp.unicode.fun = true
+maxSynthPendingDepth = 3
+linter.missingDocs = false
+linter.omit = false
+linter.loopingSimpArgs = false
+linter.extra.unreachableTactic = true
+linter.redundantVisibility = true
+linter.extra.unnecessarySeqFocus = true
+linter.extra.unusedDecidableInType = false
+weak.linter.mathlibStandardSet = false
+
+[[require]]
+name = "mathlib"
+scope = "leanprover-community"
+rev = "v4.35.0"
+
+[[require]]
+name = "iris"
+git = "https://github.com/leanprover-community/iris-lean"
+rev = "9a4ae0df7ea421267d6cbed9496a3845dd14e1e1"
+subDir = "Iris"
+
+[[lean_lib]]
+name = "Trillium"
+
+[[lean_exe]]
+name = "dumpPortingData"
+root = "scripts.DumpPortingData"
+supportInterpreter = true
